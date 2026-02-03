@@ -2,6 +2,7 @@
 Files and Process of Building a Kart, paired with optimizing laptimes using OpenAI Groq Chatbot and PostgreSQL
 
 Refer to docs/SETUP.md for setup instructions, if using on local computer to start a venv.
+Refer to docs/file_structure.md for in-depth documentation.
 
 
 ### Project Structure
@@ -10,7 +11,7 @@ Refer to docs/SETUP.md for setup instructions, if using on local computer to sta
 SpeedDemon/
 ├── .github/workflows/       # CI/CD (Test & Deploy)
 ├── data/                    # Raw and Processed Data (git-ignored)
-├── docs/                    # Architectural decisions (ADRs) & API docs --> Refer to file_structure.md for in-depth documentation
+├── docs/                    # Architectural decisions (ADRs) & API docs
 ├── models/                  # Local model registry (git-ignored)
 ├── notebooks/               # Research & EDA
 ├── reports/figures/         # Exported EDA plots for viewing

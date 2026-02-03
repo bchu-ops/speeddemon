@@ -17,9 +17,6 @@ SpeedDemon/
 │	├── reports.md					# Catalogs generated insights and stakeholder KPIs
 │	├── SETUP.md					# Step-by-step local environment installation guide
 │	├── to_do.md					# Tasks left to do
-You can view the tasks in `/docs/to_do.md` file in your project. That file catalogs all remaining tasks for the SpeedDemon project.
-
-If you'd like me to help you update or add items to that file, please share its current contents.
 │	└── workflows.md				# Documents CI/CD and automated pipeline schedules
 ├── models/						# Local model registry (git-ignored), Serialized model binaries (.pkl, .onnx, .h5, .hdf5, .pt, .pth)
 ├── notebooks/					# Research & EDA
