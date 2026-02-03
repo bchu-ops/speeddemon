@@ -18,4 +18,4 @@ EXS=$(grep -c "satisfied" ./.venv/.pip.log)
 ERR=$(grep -ciE "error|failed|could not" ./.venv/.pip.log)
 echo "New: $NEW | Existing: $EXS | Errors: $ERR"
 echo "Setup complete, command 'deactivate' to exit the virtual environment."
-echo "To reactivate later, run: source setup.sh"
+echo "To reactivate later, run: source scripts/setup.sh"

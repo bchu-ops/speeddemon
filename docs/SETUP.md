@@ -5,7 +5,7 @@ The SpeedDemon project setup is straightforward and automated via a shell script
 ### Quick Start
 Run the setup script from the project root:
 ```bash
-source setup.sh
+source scripts/setup.sh
 ```
 
 ### What the Setup Does
@@ -29,7 +29,12 @@ The project uses the following key dependencies:
 ### To Persist Virtual Environment
 After running setup, the virtual environment is activated for that session. To keep it activated in your current shell, run:
 ```bash
-source setup.sh
+source scripts/setup.sh
+```
+
+To deactivate, run:
+```bash
+deactivate
 ```
 
 The project appears to be focused on **kart racing optimization** using telemetry data analysis with OpenAI/Groq AI integration and PostgreSQL for data storage.

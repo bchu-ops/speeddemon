@@ -3,24 +3,22 @@ Files and Process of Building a Kart, paired with optimizing laptimes using Open
 
 Refer to docs/SETUP.md for setup instructions, if using on local computer to start a venv.
 
-├── notebooks/               # Research & EDA (Renamed from research/ for convention)
-│   ├── 01_eda.ipynb         # Numbered for chronological order
-│   └── 02_prototypes.ipynb
+
 ### Project Structure
 
 ```text
 SpeedDemon/
 ├── .github/workflows/       # CI/CD (Test & Deploy)
-├── data/                    # Raw and Processed Data
+├── data/                    # Raw and Processed Data (git-ignored)
 ├── docs/                    # Architectural decisions (ADRs) & API docs --> Refer to file_structure.md for in-depth documentation
-├── models/                  # Local model registry (git-ignored), Serialized model binaries (.pkl, .onnx)
+├── models/                  # Local model registry (git-ignored)
 ├── notebooks/               # Research & EDA
 ├── reports/figures/         # Exported EDA plots for viewing
 ├── scripts/                 # Setup, migrations, and docker entrypoints
 │
 ├── src/                     # THE SOURCE ROOT (Installable package)
 │   ├── __init__.py          # Makes src a package
-│   ├── data_pipeline/       # E-L-T Engine
+│   ├── data_pipeline/       # E-L-T Engine/Data Architecture
 │   ├── warehouse/           # SQL logic (DuckDB/dbt-style)
 │   └── ml/                  # Machine Learning Logic
 │
@@ -33,47 +31,10 @@ SpeedDemon/
 ├── main.py
 ├── README.md
 └── requirements.txt
-
-
-project_root/
-├── .github/                # AUTOMATION (CI/CD)
-│   └── workflows/
-		├── docs.md				# Describes the workflow CI/CD
-│       ├── test.yml        	# Runs unit tests on every push
-│       └── deploy.yml      	# Deploys model to production/cloud
-├── data_pipeline/          # THE "E-L-T" ENGINE (Data Engineering)
-│   ├── extract.py          	# Pulls from Kafka/APIs/DBs
-│   ├── load.py             	# Dumps raw files to Bronze
-│   └── transform.py        	# Complex cleaning (Silver) & Feature prep (Gold)
-├── storage/                # THE DATA LAKE (Physical Parquet Files)
-│   ├── bronze/             	# Raw, immutable source mirrors
-│   ├── silver/             	# Cleaned, typed, and deduplicated data
-│   └── gold/               	# Analytics-ready tables & ML Feature sets
-├── warehouse/              # THE SQL LAYER (Analytics & KPIs)
-│   ├── schema.sql          	# DuckDB table definitions
-│   └── models.sql          	# SQL-based business logic/joins
-├── ml/                     # THE INTELLIGENCE LAYER (Machine Learning)
-│   ├── features.py         	# Converts Gold data to Tensors/ML-ready arrays
-│   ├── model_logic.py      	# Model architectures (Ridge, Lasso, etc.)
-│   └── train.py            	# Training loops & Hyperparameter tuning (L1/L2)
-├── models/                 # Serialized model binaries (.pkl, .onnx)
-├── research/               # NEW: THE "EXPLORATION" HUB
-│   ├── eda/                	# Outlier analysis, variance checks, distributions
-│   ├── prototypes/         	# Testing new regularization math/L1 vs L2
-│   └── validation/         	# Fairness/Bias testing & error analysis
-│
-├── reports/                # NEW: THE "INSIGHTS" HUB (Static Outputs)
-│   └── figures/            	# Saved EDA plots (.png) for stakeholders
-│
-├── scripts/                # OPERATIONAL SCRIPTS
-│
-│
-│
-
 ```
 
 # Naming Conventions
-### 📂 Naming Conventions
+### 📂 Basic Naming Conventions
 | Level | Convention | Example |
 | :--- | :--- | :--- |
 | **Directories** | `snake_case` | `data_pipeline/`, `ml_models/` |
