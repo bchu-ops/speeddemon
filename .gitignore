@@ -5,3 +5,4 @@ __pycache__/
 .*
 !.env.example
 data/
+/docs/.to_do.md
