@@ -9,6 +9,7 @@ if [ ! -d ".venv" ]; then
 fi
 # Activate for the current script's process to install requirements
 source .venv/bin/activate
+echo "Virtual environment activated."
 
 # Install requirements and log output
 pip install -r requirements.txt > ./.venv/.pip.log 2>&1
