@@ -20,12 +20,16 @@ fi
 if ! command -v jq &> /dev/null; then
     echo -e "${RED}Error: jq not found. Install it with 'brew install jq' or 'sudo apt install jq'${NC}"
     exit 1
+else
+    echo -e "${GREEN}✓ jq found${NC}"
 fi
 
 # 3. Check for Docker
 if ! docker info &> /dev/null; then
     echo -e "${RED}Error: Docker is not running. Please start Docker Desktop OR Docker not running: Start Docker Desktop. ${NC}"
     exit 1
+else
+    echo -e "${GREEN}✓ docker found${NC}"
 fi
 
 # 4. Initialize Local Python Environment

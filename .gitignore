@@ -1,8 +1,21 @@
+# Environments
 .venv/
-__pycache__/
-*.pyc
-*.env
-.*
+.env
+.env.*
 !.env.example
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Project Specific
 data/
 /docs/.to_do.md
+
+# Tools
+.uv/
+.pytest_cache/
+
+# System
+.DS_Store

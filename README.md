@@ -11,6 +11,7 @@ Refer to docs/file_structure.md for in-depth documentation.
 SpeedDemon/
 ├── .github/workflows/       # CI/CD (Test & Deploy)
 ├── data/                    # Raw and Processed Data (git-ignored)
+├── deploy/					 # Infrastructure & Automation
 ├── docs/                    # Architectural decisions (ADRs) & API docs
 ├── models/                  # Local model registry (git-ignored)
 ├── notebooks/               # Research & EDA
@@ -29,9 +30,10 @@ SpeedDemon/
 │
 ├── .env.example
 ├── .gitignore
-├── main.py
 ├── README.md
-└── requirements.txt
+├── setup.sh
+├── pyproject.toml
+└── uv.lock
 ```
 
 # Naming Conventions

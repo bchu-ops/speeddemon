@@ -1,0 +1,32 @@
+services:
+  backend:
+    build:
+      # Context '..' is vital because this file is inside /deploy
+      context: .. 
+      dockerfile: deploy/Dockerfile
+    container_name: speeddemon_dev
+    ports:
+      - "8000:8000"
+    # Mount local source code for instant updates without rebuilding
+    volumes:
+      - ../src:/app/src
+    # Pulls your local secrets (OPENAI_API_KEY, etc.) into the container
+    env_file:
+      - ../.env
+    environment:
+      - ENV=development
+      - DEBUG=True
+    
+    # Modern Hot-Reload (Docker Compose V2.22+)
+    # This detects changes on your laptop and updates the container instantly
+    develop:
+      watch:
+        # If you run 'make sync' or 'uv add', rebuild the image
+        - path: ../pyproject.toml
+          action: rebuild
+        - path: ../uv.lock
+          action: rebuild
+        # If you just edit Python files, sync them without restarting
+        - path: ../src
+          action: sync
+          target: /app/src

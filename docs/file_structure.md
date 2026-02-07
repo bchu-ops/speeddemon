@@ -9,6 +9,13 @@ SpeedDemon/
 │	├── bronze/						# Raw, immutable source mirrors
 │	├── silver/						# Cleaned, typed, and deduplicated data
 │	└── gold/						# Analytics-ready tables & ML Feature sets
+├── deploy/						# Infrastructure & Automation
+│   ├── Dockerfile					# Multi-stage production recipe
+│   ├── docker-compose.yml			# Service orchestration
+│   ├── .dockerignore				# Docker build exclusion rules
+│   ├── Makefile					# Command shortcuts
+│   ├── k8s-deployment.yml			# Kubernetes Deployment (Pods/Replicas)
+│   └── k8s-service.yml				# Kubernetes Networking (LoadBalancer)
 ├── docs/						# Architectural decisions (ADRs) & API docs
 │	├── data_architecture.md		# Visualizes data flow from source to Gold layer
 │	├── file_structure.md			# Defines folder hierarchy and naming conventions
@@ -46,9 +53,10 @@ SpeedDemon/
 ├── .env.example				# example environment variable file
 ├── .gitignore					# ignore __pycache__, .env, .venv, .DS_Store, /models/
 ├── main.py						# THE ORCHESTRATOR (Runs ELT -> ML)
-├── README.md					# project overview and description
-├── requirements.txt			# Imports packages required to run project like: fastf1, polars, duckdb, scikit-learn, pyarrow
-└── requirements-dev.txt		# black, mypy, pylint, pytest
+├── README.md					# Project overview and documentation links
+├── setup.sh					# Local environment setup script (uv, jq, Docker, Python, .env, Kubernetes(optional))
+├── pyproject.toml				# Human-readable dependencies
+└── uv.lock						# Dependency lock file for reproducible environments
 
 ```
 
