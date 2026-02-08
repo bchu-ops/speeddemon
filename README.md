@@ -136,10 +136,13 @@ The project includes a comprehensive **Master Makefile** at the root for easy ma
 # Start the stable production-style stack
 make up
 
-# Services will be available at:
-# Frontend (UI):   http://localhost:3000
-# Backend (API):    http://localhost:8000
-# Notebook (ML):    http://localhost:8888
+# ═══════════════════════════════════════════════════════════════
+# VIEW YOUR SERVICES AT (LOCAL DEVELOPMENT):
+# ═══════════════════════════════════════════════════════════════
+# FRONTEND (UI):    http://localhost:3000
+# BACKEND (API):    http://localhost:8000
+# NOTEBOOK (ML):    http://localhost:8888
+# ═══════════════════════════════════════════════════════════════
 ```
 
 ### Option 2: Development Mode (with hot reload)
@@ -150,6 +153,14 @@ make dev
 # Services run with hot reload for development
 # Frontend changes auto-reload
 # Backend changes auto-reload
+
+# ═══════════════════════════════════════════════════════════════
+# VIEW YOUR SERVICES AT (LOCAL DEVELOPMENT):
+# ═══════════════════════════════════════════════════════════════
+# FRONTEND (UI):    http://localhost:3000
+# BACKEND (API):    http://localhost:8000
+# NOTEBOOK (ML):    http://localhost:8888
+# ═══════════════════════════════════════════════════════════════
 ```
 
 ### Option 3: Targeted Service Development (With Hot-Reload)
@@ -164,7 +175,14 @@ make dev-notebook
 make dev-backend
 
 # Run Frontend and Backend together (No Notebook to save RAM)
-make dev-frontend-backend
+make dev frontend backend
+
+# ═══════════════════════════════════════════════════════════════
+# VIEW YOUR SERVICES AT (LOCAL DEVELOPMENT):
+# ═══════════════════════════════════════════════════════════════
+# FRONTEND (UI):    http://localhost:3000
+# BACKEND (API):    http://localhost:8000
+# ═══════════════════════════════════════════════════════════════
 ```
 
 ### Option 4: Local Development
@@ -189,6 +207,13 @@ uv run python backend/src/main.py
 cd frontend
 npm install
 npm run dev
+
+# ═══════════════════════════════════════════════════════════════
+# VIEW YOUR SERVICES AT (LOCAL DEVELOPMENT):
+# ═══════════════════════════════════════════════════════════════
+# FRONTEND (UI):    http://localhost:3000
+# BACKEND (API):    http://localhost:8000 (if running separately)
+# ═══════════════════════════════════════════════════════════════
 ```
 
 ## 🔧 Services
@@ -208,9 +233,27 @@ in .env.example
 - `OPENAI_MODEL` (default: `gpt-5.1`)
 
 ## 🔍 Health & Monitoring
-- Frontend: http://localhost:3000
-- Backend API: http://localhost:8000/health (when implemented)
-- Jupyter Notebook: http://localhost:8888
+
+### Local Development (Docker)
+```
+═══════════════════════════════════════════════════════════════
+VIEW YOUR SERVICES AT (LOCAL DEVELOPMENT):
+═══════════════════════════════════════════════════════════════
+FRONTEND (UI):    http://localhost:3000
+BACKEND (API):    http://localhost:8000
+NOTEBOOK (ML):    http://localhost:8888
+═══════════════════════════════════════════════════════════════
+```
+
+### Production Deployment (GitHub Pages)
+```
+═══════════════════════════════════════════════════════════════
+VIEW YOUR DEPLOYED WEBSITE (GITHUB PAGES):
+═══════════════════════════════════════════════════════════════
+PRODUCTION SITE:  https://bchu-ops.github.io/speeddemon/
+═══════════════════════════════════════════════════════════════
+```
+*Note: The URL is automatically generated based on your repository name. For this repo, it's `https://bchu-ops.github.io/speeddemon/`*
 
 ## 🛠️ Tech Stack
 
