@@ -3,7 +3,8 @@
 SpeedDemon/
 ├── .github/workflows/			# AUTOMATION (CI/CD)
 │	├── ci.yml					# Continuous Integration pipeline (linting, testing, Docker builds)
-│	└── deploy.yml				# Deployment pipeline (builds images, pushes to Docker Hub, deploys to Kubernetes)
+│	├── deploy.yml				# Deployment pipeline (builds images, pushes to Docker Hub, deploys to Kubernetes)
+│	└── pages.yml				# GitHub Pages deployment (builds and deploys frontend)
 ├── backend/					# Backend Python Service
 │	├── notebooks/				# Research & EDA
 │	│	└── eda/				# Exploratory data analysis notebooks
@@ -68,3 +69,71 @@ SpeedDemon/
 └── uv.lock					# Dependency lock file for reproducible environments
 
 ```
+
+## 🚀 Quick Start - Running the Application
+
+### Docker (Recommended)
+
+```bash
+# Setup environment
+./setup.sh
+
+# Start all services
+make up
+
+# Or start in development mode
+make dev
+
+# Or start specific services
+make dev frontend backend
+```
+
+**Access Services:**
+```
+═══════════════════════════════════════════════════════════════
+VIEW YOUR SERVICES AT (LOCAL DEVELOPMENT):
+═══════════════════════════════════════════════════════════════
+FRONTEND (UI):    http://localhost:3000
+BACKEND (API):    http://localhost:8000
+NOTEBOOK (ML):    http://localhost:8888
+═══════════════════════════════════════════════════════════════
+```
+
+### Local Development (Without Docker)
+
+**Backend:**
+```bash
+# From project root
+make sync  # Syncs dependencies with --all-packages
+uv run python backend/src/main.py
+```
+
+**Frontend:**
+```bash
+cd frontend
+npm install
+npm run dev
+```
+
+**Access Services:**
+```
+═══════════════════════════════════════════════════════════════
+VIEW YOUR SERVICES AT (LOCAL DEVELOPMENT):
+═══════════════════════════════════════════════════════════════
+FRONTEND (UI):    http://localhost:3000
+BACKEND (API):    http://localhost:8000
+═══════════════════════════════════════════════════════════════
+```
+
+### Production Deployment
+
+**GitHub Pages (Frontend):**
+```
+═══════════════════════════════════════════════════════════════
+VIEW YOUR DEPLOYED WEBSITE (GITHUB PAGES):
+═══════════════════════════════════════════════════════════════
+PRODUCTION SITE:  https://bchu-ops.github.io/speeddemon/
+═══════════════════════════════════════════════════════════════
+```
+
+**Base Path:** The frontend automatically uses `/speeddemon/` as the base path for GitHub Pages (configured in `frontend/vite.config.js`).

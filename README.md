@@ -98,20 +98,27 @@ The project includes a comprehensive **Master Makefile** at the root for easy ma
 
 ### Development Commands (with hot reload)
 ```bash
-- `make dev`            # Start all services in development mode with **Docker Watch**
+- `make dev`            # Start all services in development mode (foreground with logs)
+- `make dev [services]` # Start specific services (e.g., `make dev frontend backend`)
 - `make dev-up`         # Start development services in the background
 - `make dev-down`       # Stop development services
 - `make dev-logs`       # View development logs (Backend specifically)
+- `make dev-backend`    # Start only backend (foreground with logs)
+- `make dev-frontend`   # Start only frontend (foreground with logs)
+- `make dev-notebook`   # Start only notebook (foreground with logs)
 ```
 
 ### Backend & Research Commands
 ```bash
-- `make backend-build`  # Build only the Backend/ML image
-- `make backend-up`      # Start only the Backend service
+- `make backend-build`   # Build only the Backend/ML image
+- `make backend-up`      # Start only the Backend service (detached)
+- `make dev-backend`      # Start only the Backend service (foreground with logs)
 - `make backend-down`    # Stop only the Backend service
-- `make notebook-url`    # Get the Jupyter login URL for ML research
+- `make shell`           # Open a terminal inside the running Backend container
+- `make notebook-url`     # Get the Jupyter login URL for ML research
 - `make frontend-shell`  # Open a terminal inside the running Frontend container
-# - `make shell`           # Open a terminal inside the running Backend container
+- `make dev-frontend`     # Start only the Frontend service (foreground with logs)
+- `make dev-notebook`     # Start only the Notebook service (foreground with logs)
 ```
 
 ### Utility & Dependency Commands
@@ -277,6 +284,7 @@ PRODUCTION SITE:  https://bchu-ops.github.io/speeddemon/
 - Makefile for project management
 - Automated setup script for environment configuration
 - Kubernetes deployment files (k8s-deployment.yml, k8s-service.yml)
+- GitHub Pages for frontend deployment (automatic via GitHub Actions)
 
 ## 🚀 Deployment & Scaling
 
@@ -310,6 +318,25 @@ make k8s-sync-secrets
 # Deploy to Kubernetes
 make k8s-deploy
 ```
+
+### GitHub Pages Deployment (Frontend)
+
+The frontend is automatically deployed to GitHub Pages when you push to the `main` branch.
+
+**Deployment URL:**
+```
+═══════════════════════════════════════════════════════════════
+VIEW YOUR DEPLOYED WEBSITE (GITHUB PAGES):
+═══════════════════════════════════════════════════════════════
+PRODUCTION SITE:  https://bchu-ops.github.io/speeddemon/
+═══════════════════════════════════════════════════════════════
+```
+
+**Base Path Configuration:**
+- The frontend automatically uses `/speeddemon/` as the base path for GitHub Pages
+- Configured in `frontend/vite.config.js` - auto-detects repository name
+- Local/Docker development uses `/` (root path)
+- No manual configuration needed - works automatically
 
 ## 🧪 Testing
 

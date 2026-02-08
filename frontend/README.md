@@ -29,15 +29,52 @@ This will install all required packages listed in `package.json` and generate `p
 
 ## Running the Application
 
-### Development Mode
+### Option 1: Using Docker (Recommended)
 
-Start the development server with hot module replacement:
+From the project root:
 
 ```bash
-npm run dev
+# Build the frontend image
+make frontend-build
+
+# Start frontend only (detached)
+make frontend-up
+
+# Start frontend in development mode (foreground with logs)
+make dev-frontend
+
+# Start frontend and backend together
+make dev frontend backend
+
+# ═══════════════════════════════════════════════════════════════
+# VIEW YOUR SERVICES AT (LOCAL DEVELOPMENT):
+# ═══════════════════════════════════════════════════════════════
+# FRONTEND (UI):    http://localhost:3000
+# ═══════════════════════════════════════════════════════════════
 ```
 
-The application will be available at `http://localhost:3000`.
+### Option 2: Local Development (Without Docker)
+
+**Requirements:**
+- Node.js 18.0+
+- npm 9.0+
+
+```bash
+# Navigate to frontend directory
+cd frontend
+
+# Install dependencies
+npm install
+
+# Start development server
+npm run dev
+
+# ═══════════════════════════════════════════════════════════════
+# VIEW YOUR SERVICES AT (LOCAL DEVELOPMENT):
+# ═══════════════════════════════════════════════════════════════
+# FRONTEND (UI):    http://localhost:3000
+# ═══════════════════════════════════════════════════════════════
+```
 
 The development server includes:
 - **Hot Module Replacement (HMR)**: Changes to files are instantly reflected in the browser
@@ -61,6 +98,31 @@ Preview the production build locally:
 ```bash
 npm run preview
 ```
+
+### GitHub Pages Deployment
+
+The frontend is automatically deployed to GitHub Pages on push to `main` branch.
+
+**Base Path Configuration:**
+- The base path is automatically configured in `vite.config.js` based on your repository name
+- For project pages: `/speeddemon/` (matches your repo name)
+- For user/org pages: `/` (if using `username.github.io`)
+
+**Deployed URL:**
+```
+═══════════════════════════════════════════════════════════════
+VIEW YOUR DEPLOYED WEBSITE (GITHUB PAGES):
+═══════════════════════════════════════════════════════════════
+PRODUCTION SITE:  https://bchu-ops.github.io/speeddemon/
+═══════════════════════════════════════════════════════════════
+```
+
+**How Base Path Works:**
+- **Local Development**: Base path is `/` (root)
+- **Docker Development**: Base path is `/` (root)
+- **GitHub Pages Production**: Base path is `/speeddemon/` (auto-detected from `GITHUB_REPOSITORY` env var)
+
+The base path is set automatically during the GitHub Actions build process. No manual configuration needed.
 
 ## How It Works
 
@@ -112,12 +174,16 @@ frontend/
 ├── reports/                  # Reports directory (preserved)
 │   └── .gitkeep             # Keeps directory in git
 ├── index.html                # HTML entry point
-├── vite.config.js            # Vite configuration
+├── vite.config.js            # Vite configuration (includes base path for GitHub Pages)
 ├── package.json              # Dependencies and scripts
 ├── package-lock.json         # Locked dependency versions
 ├── .gitignore               # Git ignore rules
 └── README.md                 # This file
 ```
+
+**Key Configuration:**
+- **`vite.config.js`**: Configures base path for GitHub Pages (`/speeddemon/`), development server settings, and API proxy
+- **Base Path**: Automatically set to `/speeddemon/` for GitHub Pages production builds, `/` for local/Docker development
 
 ## Required Packages
 
@@ -142,12 +208,46 @@ VITE_API_URL=http://localhost:8000
 
 In development, the proxy configured in `vite.config.js` handles API routing automatically.
 
+**Base Path Configuration:**
+The base path for GitHub Pages is configured in `vite.config.js`:
+- **Local/Docker Development**: `/` (root path)
+- **GitHub Pages Production**: `/speeddemon/` (auto-detected from repository name)
+- The base path is automatically set during GitHub Actions builds via `GITHUB_REPOSITORY` environment variable
+
 ## Development Workflow
+
+### Using Docker (Recommended)
+
+```bash
+# From project root
+# Start frontend and backend together
+make dev frontend backend
+
+# Or start frontend only
+make dev-frontend
+
+# View logs
+make logs
+
+# Stop services
+make dev-down
+```
+
+### Local Development
 
 1. **Start Backend**: Ensure the backend is running on `http://localhost:8000`
 2. **Start Frontend**: Run `npm run dev` in the frontend directory
 3. **Make Changes**: Edit files in `src/` - changes will hot-reload automatically
 4. **Test API**: Use the "Check Backend Health" button on the homepage to verify backend connectivity
+
+**Access:**
+```
+═══════════════════════════════════════════════════════════════
+VIEW YOUR SERVICES AT (LOCAL DEVELOPMENT):
+═══════════════════════════════════════════════════════════════
+FRONTEND (UI):    http://localhost:3000
+═══════════════════════════════════════════════════════════════
+```
 
 ## Features
 
@@ -172,26 +272,53 @@ In development, the proxy configured in `vite.config.js` handles API routing aut
 
 ### Port Already in Use
 
-If port 3000 is already in use, Vite will automatically try the next available port. You can also specify a port:
+If port 3000 is already in use:
 
+**Docker:**
 ```bash
+# Stop other containers using the port
+docker ps | grep 3000
+docker stop <container-name>
+
+# Or use make to stop all SpeedDemon services
+make dev-down
+```
+
+**Local:**
+```bash
+# Vite will automatically try the next available port, or specify:
 npm run dev -- --port 3001
 ```
 
 ### Backend Not Connecting
 
 1. Verify backend is running: `curl http://localhost:8000/health`
-2. Check `vite.config.js` proxy configuration
+2. Check `vite.config.js` proxy configuration:
+   - Development: `/api/*` → `http://localhost:8000/*`
+   - Docker: `/api/*` → `http://backend:8000/*` (uses service name)
 3. Ensure CORS is enabled on the backend
 
 ### Dependencies Issues
 
-If you encounter dependency issues:
+**Docker:**
+```bash
+# Rebuild the frontend image
+make frontend-build
+```
 
+**Local:**
 ```bash
 rm -rf node_modules package-lock.json
 npm install
 ```
+
+### Base Path Issues (GitHub Pages)
+
+If assets fail to load on GitHub Pages:
+1. Check the GitHub Actions workflow logs for the base path used
+2. Verify `vite.config.js` is detecting `GITHUB_REPOSITORY` correctly
+3. Ensure the repository name matches the base path (case-sensitive)
+4. The base path should be `/speeddemon/` (lowercase) for this repository
 
 ## Contributing
 

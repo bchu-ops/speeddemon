@@ -102,25 +102,42 @@ backend/
 
 ## Running the Backend
 
-### Using Docker Compose
+### Option 1: Using Docker (Recommended)
 
 From the project root:
 
 ```bash
-# Start backend only
+# Build the backend image
+make backend-build
+
+# Start backend only (detached)
 make backend-up
+
+# Start backend in development mode (foreground with logs)
+make dev-backend
 
 # Start all services (backend + frontend + notebook)
 make up
 
-# Development mode with hot reload
+# Development mode with hot reload for all services
 make dev
+
+# ═══════════════════════════════════════════════════════════════
+# VIEW YOUR SERVICES AT (LOCAL DEVELOPMENT):
+# ═══════════════════════════════════════════════════════════════
+# BACKEND (API):    http://localhost:8000
+# NOTEBOOK (ML):    http://localhost:8888
+# ═══════════════════════════════════════════════════════════════
 ```
 
-### Local Development
+### Option 2: Local Development (Without Docker)
+
+**Requirements:**
+- Python 3.10+
+- uv (Python package manager)
 
 ```bash
-# Sync workspace dependencies (must use --all-packages)
+# From project root, sync workspace dependencies (must use --all-packages)
 uv sync --all-packages
 # Or use the Makefile command
 make sync
@@ -130,6 +147,12 @@ uv run python backend/src/main.py
 
 # Or run specific modules
 uv run python -m backend.src.data_pipeline.extract
+
+# ═══════════════════════════════════════════════════════════════
+# VIEW YOUR SERVICES AT (LOCAL DEVELOPMENT):
+# ═══════════════════════════════════════════════════════════════
+# BACKEND (API):    http://localhost:8000 (if FastAPI server is running)
+# ═══════════════════════════════════════════════════════════════
 ```
 
 ### Jupyter Notebook
@@ -137,21 +160,40 @@ uv run python -m backend.src.data_pipeline.extract
 Access the Jupyter notebook environment:
 
 ```bash
-# Start notebook service
-make dev notebook
+# Start notebook service (Docker)
+make dev-notebook
 
 # Get the login URL
 make notebook-url
-```
 
-The notebook will be available at `http://localhost:8888`
+# ═══════════════════════════════════════════════════════════════
+# VIEW YOUR SERVICES AT (LOCAL DEVELOPMENT):
+# ═══════════════════════════════════════════════════════════════
+# NOTEBOOK (ML):    http://localhost:8888
+# ═══════════════════════════════════════════════════════════════
+```
 
 ## Development Workflow
 
-1. **Sync Dependencies**: Run `uv sync` after pulling changes
-2. **Run Tests**: Use `make test` or `uv run pytest`
+1. **Sync Dependencies**: Run `make sync` or `uv sync --all-packages` after pulling changes
+2. **Run Tests**: Use `make test` or `uv run pytest backend/tests/`
 3. **Lint Code**: Use `make lint` or `uv run ruff check backend`
 4. **Add Dependencies**: Use `make add PKG=package-name` or `uv add --package speeddemon-backend package-name`
+
+**Quick Commands:**
+```bash
+# Start backend in Docker
+make dev-backend
+
+# View logs
+make dev-logs
+
+# Open shell in container
+make shell
+
+# Stop services
+make dev-down
+```
 
 ## API Endpoints
 
