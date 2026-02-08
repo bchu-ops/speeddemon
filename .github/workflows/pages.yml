@@ -54,11 +54,17 @@ jobs:
           npm run build
           echo ""
           echo "=== Verifying Build Output ==="
-          echo "Checking index.html for asset paths:"
-          grep -E '(href|src)="/(speeddemon|SpeedDemon)' dist/index.html | head -10 || echo "No matches found"
+          echo "Full index.html content (checking asset paths):"
+          cat dist/index.html
           echo ""
-          echo "First few lines of index.html:"
-          head -20 dist/index.html | grep -E '(href|src)=' || true
+          echo "Checking for asset references:"
+          grep -oE '(href|src)="[^"]*"' dist/index.html || echo "No asset references found"
+          echo ""
+          echo "Listing dist directory contents:"
+          ls -la dist/ || true
+          echo ""
+          echo "Checking if assets directory exists:"
+          ls -la dist/assets/ 2>/dev/null || echo "Assets directory not found"
       
       - name: Create 404.html for SPA routing
         working-directory: ./frontend/dist
