@@ -17,20 +17,7 @@ services:
     environment:
       - ENV=development
       - DEBUG=True
-    
-    # Modern Hot-Reload (Docker Compose V2.22+)
-    # This detects changes on your laptop and updates the container instantly
-    develop:
-      watch:
-        # If you run 'make sync' or 'uv add', rebuild the image
-        - path: ../pyproject.toml
-          action: rebuild
-        - path: ../uv.lock
-          action: rebuild
-        # If you just edit Python files, sync them without restarting
-        - path: ../backend/src
-          action: sync
-          target: /app/backend/src
+    # Bind mounts provide instant file syncing, no watch mode needed
   
   # React UI: Vite-based Hot Reload
   frontend:
@@ -44,11 +31,7 @@ services:
       - ../frontend:/app
     depends_on:
       - backend
-    develop:
-      watch:
-        - path: ../frontend/src
-          action: sync
-          target: /app/src
+    # Bind mount already syncs files, no watch needed
 
   # ML Notebook: Research lab using the backend environment
   notebook:

@@ -3,6 +3,8 @@
 # from data_pipeline import extract, load, transform
 # from ml import train, features as feat
 
+import pandas as pd
+print(pd.DataFrame({"a": [1, 2, 3]}))
 
 # def main():
 #     raw = extract.extract("example_source")
@@ -20,3 +22,5 @@
 
 # if __name__ == "__main__":
 #     main()
+
+print("hi")

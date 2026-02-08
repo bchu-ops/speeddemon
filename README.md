@@ -60,6 +60,11 @@ Project/
 │   │   ├── ml/              # Machine learning (features, model_logic, train)
 │   │   ├── warehouse/       # SQL schemas and models
 │   │   └── main.py          # Backend entry point
+│   ├── data/                # Data storage (medallion architecture)
+│   │   ├── .cache/          # Cached intermediate data
+│   │   ├── bronze/          # Raw, unprocessed data
+│   │   ├── silver/          # Cleaned and validated data
+│   │   └── gold/            # Business-ready, feature-engineered data
 │   ├── notebooks/           # Jupyter notebooks for research
 │   ├── tests/               # Unit tests
 │   └── pyproject.toml       # Backend dependencies
@@ -172,8 +177,10 @@ make dev frontend backend
 
 ```bash
 # Backend
-# Sync workspace and run API locally
-uv sync
+# Sync workspace and run API locally (use --all-packages to install workspace member dependencies)
+uv sync --all-packages
+# Or use the Makefile command which includes this
+make sync
 uv run python backend/src/main.py
 ```
 

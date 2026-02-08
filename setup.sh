@@ -1,7 +1,7 @@
 #!/bin/bash
 
-# MecMind Setup Script
-# This script sets up the complete MecMind development environment
+# SpeedDemon Setup Script
+# This script sets up the complete SpeedDemon development environment
 
 set -e  # Exit on any error
 
@@ -79,7 +79,7 @@ setup_python_environment() {
     
     # Check Python version
     if ! command_exists python3; then
-        log_warning "Python 3 is not installed. Backend development requires Python 3.9+."
+        log_warning "Python 3 is not installed. Backend development requires Python 3.10+."
         log_info "Download from: https://www.python.org/downloads/"
         return
     fi
@@ -88,9 +88,9 @@ setup_python_environment() {
     PYTHON_MAJOR=$(echo "$PYTHON_VERSION" | cut -d'.' -f1)
     PYTHON_MINOR=$(echo "$PYTHON_VERSION" | cut -d'.' -f2)
     
-    if [ "$PYTHON_MAJOR" -lt 3 ] || ([ "$PYTHON_MAJOR" -eq 3 ] && [ "$PYTHON_MINOR" -lt 9 ]); then
-        log_warning "Python version is $PYTHON_VERSION. Required version is 3.9+."
-        log_info "Please upgrade Python to 3.9 or higher"
+    if [ "$PYTHON_MAJOR" -lt 3 ] || ([ "$PYTHON_MAJOR" -eq 3 ] && [ "$PYTHON_MINOR" -lt 10 ]); then
+        log_warning "Python version is $PYTHON_VERSION. Required version is 3.10+."
+        log_info "Please upgrade Python to 3.10 or higher"
     else
         log_info "Python version $PYTHON_VERSION detected ✓"
     fi
@@ -105,35 +105,22 @@ setup_python_environment() {
     fi
 }
 
-# # Setup Poetry (for backend services)
-# setup_poetry() {
-#     log_info "Checking for Poetry..."
+# Setup Node.js and npm (for frontend)
+setup_nodejs() {
+    log_info "Checking for Node.js..."
     
-#     if ! command_exists poetry; then
-#         log_warning "Poetry is not installed. Backend local development will require Poetry."
-#         log_info "Install with: curl -sSL https://install.python-poetry.org | python3 -"
-#     else
-#         POETRY_VERSION=$(poetry --version 2>/dev/null | cut -d' ' -f3 || echo "unknown")
-#         log_info "Poetry version $POETRY_VERSION detected ✓"
-#     fi
-# }
-
-# # Setup Node.js and npm
-# setup_nodejs() {
-#     log_info "Checking for Node.js..."
-    
-#     if ! command_exists node; then
-#         log_warning "Node.js is not installed. Frontend development will require Node.js 20+."
-#         log_info "Download from: https://nodejs.org/"
-#     else
-#         NODE_VERSION=$(node --version | cut -d'v' -f2 | cut -d'.' -f1)
-#         if [ "$NODE_VERSION" -lt 20 ]; then
-#             log_warning "Node.js version is $NODE_VERSION. Recommended version is 20+."
-#         else
-#             log_info "Node.js version $(node --version) detected ✓"
-#         fi
-#     fi
-# }
+    if ! command_exists node; then
+        log_warning "Node.js is not installed. Frontend development will require Node.js 18+."
+        log_info "Download from: https://nodejs.org/"
+    else
+        NODE_VERSION=$(node --version | cut -d'v' -f2 | cut -d'.' -f1)
+        if [ "$NODE_VERSION" -lt 18 ]; then
+            log_warning "Node.js version is $NODE_VERSION. Recommended version is 18+."
+        else
+            log_info "Node.js version $(node --version) detected ✓"
+        fi
+    fi
+}
 
 # Setup jq (required for dependency management)
 setup_jq() {
@@ -267,54 +254,6 @@ create_root_env_file() {
 create_environment_files() {
     log_info "Creating environment file templates..."
     
-    # Backend service environment files
-    BACKEND_SERVICES=("engine" "machining")
-    
-    for service in "${BACKEND_SERVICES[@]}"; do
-        if [ "$service" = "common" ]; then
-            continue  # Skip common module
-        fi
-        
-        env_file="backend/${service}/.env"
-        if [ ! -f "$env_file" ]; then
-            log_info "Creating $env_file"
-            
-            # Assign service-specific port
-            case "$service" in
-                "engine") service_port="8000" ;;
-                "machining") service_port="8001" ;;
-                *) service_port="8000" ;;
-            esac
-            
-            cat > "$env_file" << EOF
-# ${service} Service Environment Variables
-ENVIRONMENT=development
-DEBUG=true
-LOG_LEVEL=INFO
-
-# Service Configuration
-SERVICE_NAME=${service}
-SERVICE_PORT=${service_port}
-SERVICE_HOST=0.0.0.0
-
-# Database Configuration (if needed)
-# DATABASE_URL=postgresql://user:password@localhost:5432/mecmind_${service}
-
-# External APIs (if needed)
-# API_KEY=your_api_key_here
-# API_URL=https://api.example.com
-
-# Security
-# SECRET_KEY=your_secret_key_here
-# JWT_SECRET=your_jwt_secret_here
-
-# Add service-specific environment variables below
-EOF
-        else
-            log_info "$env_file already exists, skipping..."
-        fi
-    done
-    
     # Frontend environment file
     frontend_env="frontend/.env"
     if [ ! -f "$frontend_env" ]; then
@@ -322,9 +261,10 @@ EOF
         cat > "$frontend_env" << EOF
 # Frontend Environment Variables
 NODE_ENV=development
-VITE_APP_NAME=MecMind
+VITE_APP_NAME=SpeedDemon
 
-# Backend API URLs
+# Backend API URL (for production)
+VITE_API_URL=http://localhost:8000
 
 # Feature Flags
 VITE_ENABLE_DEBUG_MODE=true
@@ -342,44 +282,21 @@ EOF
 # BACKEND & FRONTEND SETUP
 # ============================================================================
 
-# Setup backend services
+# Setup backend
 setup_backend() {
-    log_info "Setting up backend services..."
+    log_info "Setting up backend..."
     
-    BACKEND_SERVICES=("common")
+    if [ ! -d "backend" ]; then
+        log_warning "backend directory does not exist, skipping..."
+        return
+    fi
     
-    for service in "${BACKEND_SERVICES[@]}"; do
-        log_info "Setting up backend/${service}..."
-        
-        if [ ! -d "backend/${service}" ]; then
-            log_warning "backend/${service} directory does not exist, skipping..."
-            continue
-        fi
-        
-        cd "backend/${service}"
-        
-        # Check if pyproject.toml exists
-        if [ ! -f "pyproject.toml" ]; then
-            log_warning "pyproject.toml not found in backend/${service}, skipping..."
-            cd - >/dev/null
-            continue
-        fi
-        
-        # Check if poetry.lock exists and is up to date
-        if [ ! -f "poetry.lock" ] || [ "pyproject.toml" -nt "poetry.lock" ]; then
-            log_info "Running poetry lock for ${service}..."
-            if command_exists poetry; then
-                poetry lock
-            else
-                log_warning "Poetry not found, skipping lock for ${service}"
-            fi
-        else
-            log_info "poetry.lock is up to date for ${service}"
-        fi
-        
-        cd - >/dev/null
-    done
+    if [ ! -f "backend/pyproject.toml" ]; then
+        log_warning "backend/pyproject.toml not found, skipping backend setup..."
+        return
+    fi
     
+    log_info "Backend structure verified ✓"
     log_success "Backend setup completed"
 }
 
@@ -406,6 +323,7 @@ setup_frontend() {
         if command_exists npm; then
             log_info "Installing frontend dependencies..."
             npm ci >/dev/null 2>&1 || npm install >/dev/null 2>&1
+            log_success "Frontend dependencies installed"
         else
             log_warning "npm not found, skipping frontend dependency installation"
         fi
@@ -429,7 +347,10 @@ validate_setup() {
     # Check if all required files exist
     REQUIRED_FILES=(
         "deploy/docker-compose.yml"
+        "deploy/Dockerfile.backend"
+        "deploy/Dockerfile.frontend"
         "Makefile"
+        "pyproject.toml"
     )
     
     for file in "${REQUIRED_FILES[@]}"; do
@@ -439,22 +360,22 @@ validate_setup() {
         fi
     done
     
-    # Check if backend services exist
-    BACKEND_SERVICES=("common" "engine" "machining")
-    for service in "${BACKEND_SERVICES[@]}"; do
-        if [ ! -d "backend/${service}" ]; then
-            log_warning "Backend service missing: backend/${service} (will be created later)"
-            continue
-        fi
-        
-        if [ -d "backend/${service}" ] && [ ! -f "backend/${service}/pyproject.toml" ]; then
-            log_warning "pyproject.toml missing for: backend/${service}"
-        fi
-    done
+    # Check if backend structure exists
+    if [ ! -d "backend/src" ]; then
+        log_warning "Backend src directory missing: backend/src"
+    fi
+    
+    if [ ! -f "backend/src/main.py" ]; then
+        log_warning "Backend entry point missing: backend/src/main.py"
+    fi
+    
+    if [ ! -f "backend/pyproject.toml" ]; then
+        log_warning "Backend pyproject.toml missing"
+    fi
     
     # Check if frontend exists
     if [ ! -d "frontend" ]; then
-        log_warning "Frontend directory missing (will be created later)"
+        log_warning "Frontend directory missing"
     elif [ ! -f "frontend/package.json" ]; then
         log_warning "Frontend package.json missing"
     fi
@@ -468,7 +389,7 @@ validate_setup() {
 
 main() {
     echo "======================================"
-    echo "      MecMind Setup Script v1.0       "
+    echo "      SpeedDemon Setup Script v1.0    "
     echo "======================================"
     echo ""
     
@@ -478,14 +399,13 @@ main() {
         log_info "This script will create necessary files and directories."
     fi
     
-    log_info "Starting MecMind setup..."
+    log_info "Starting SpeedDemon setup..."
     
     # Package & Language Setup
     setup_python_package_manager
     setup_jq
+    setup_nodejs
     setup_python_environment
-    # setup_poetry
-    # setup_nodejs
     
     # Docker Setup
     check_docker_prerequisites
@@ -493,14 +413,14 @@ main() {
     
     # Environment Files Setup
     create_root_env_file
-    # create_environment_files
+    create_environment_files
     
-    # # Backend & Frontend Setup
-    # setup_backend
-    # setup_frontend
+    # Backend & Frontend Setup
+    setup_backend
+    setup_frontend
     
-    # # Validation
-    # validate_setup
+    # Validation
+    validate_setup
     
     # Kubernetes Setup (Optional)
     setup_kubernetes
@@ -511,10 +431,13 @@ main() {
     echo "======================================"
     echo ""
     echo "Next steps:"
-    echo "1. Review and customize the .env files in each service directory (add OPENAI_API_KEY in .env)"
+    echo "1. Review and customize the .env file (add OPENAI_API_KEY)"
     echo "2. Run 'make build' to build all Docker images"
     echo "3. Run 'make up' to start all services"
     echo "4. Access the application:"
+    echo "   - Frontend: http://localhost:3000"
+    echo "   - Backend:  http://localhost:8000"
+    echo "   - Notebook: http://localhost:8888"
     echo ""
     echo "For more information, see:"
     echo "- README.md"
@@ -530,5 +453,3 @@ main() {
 }
 # Run main function
 main "$@"
-
-

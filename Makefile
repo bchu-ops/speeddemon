@@ -14,7 +14,7 @@ NOTEBOOK_NAME := speeddemon_notebook
 # --- Docker Variable ---
 COMPOSE = docker compose -f $(DEPLOY_DIR)/docker-compose.yml
 
-.PHONY: help build up down restart logs clean dev dev-up dev-down dev-logs backend-build backend-up backend-down status health sync add test lint shell notebook-url frontend-shell
+.PHONY: help build up down restart logs clean dev dev-up dev-down dev-logs dev-backend dev-frontend dev-notebook backend-build backend-up backend-down status health sync add test lint shell notebook-url frontend-shell
 # --- Help ---
 help: ## Show all available commands
 	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | sort | awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-20s\033[0m %s\n", $$1, $$2}'
@@ -36,8 +36,8 @@ clean: ## Deep clean: remove containers, images, volumes, and orphans
 	$(COMPOSE) down --rmi all --volumes --remove-orphans
 
 # --- Development Commands ---
-dev: ## Start in watch mode (Hot-reload)
-	$(COMPOSE) up --watch
+dev: ## Start in development mode (Hot-reload via bind mounts)
+	$(COMPOSE) up
 
 dev-up: ## Start development services (detached)
 	$(COMPOSE) up -d
@@ -59,11 +59,40 @@ frontend-shell: ## Open a shell in the Frontend (React) container
 backend-build: ## Build only backend services
 	$(COMPOSE) build backend
 
-backend-up: ## Start only backend services
+backend-up: ## Start only backend services (detached)
 	$(COMPOSE) up -d backend
+
+dev-backend: ## Start only backend in development mode (foreground with logs)
+	$(COMPOSE) up backend
 
 backend-down: ## Stop only backend services
 	$(COMPOSE) stop backend
+
+# --- Frontend Specific Commands ---
+frontend-build: ## Build only frontend services
+	$(COMPOSE) build frontend
+
+frontend-up: ## Start only frontend services (detached)
+	$(COMPOSE) up -d frontend
+
+dev-frontend: ## Start only frontend in development mode (foreground with logs)
+	$(COMPOSE) up frontend
+
+frontend-down: ## Stop only frontend services
+	$(COMPOSE) stop frontend
+
+# --- Notebook Specific Commands ---
+notebook-build: ## Build only notebook services
+	$(COMPOSE) build notebook
+
+notebook-up: ## Start only notebook services (detached)
+	$(COMPOSE) up -d notebook
+
+dev-notebook: ## Start only notebook in development mode (foreground with logs)
+	$(COMPOSE) up notebook
+
+notebook-down: ## Stop only notebook services
+	$(COMPOSE) stop notebook
 
 # --- Status & Health ---
 status: ## Show status of all services
@@ -88,9 +117,6 @@ test-cov: ## Run tests and generate a coverage report (HTML)
 lint: ## Check for code style issues locally
 	@cd $(ROOT_DIR) && uv run ruff check .
 
-shell: ## Open a shell in the running backend container
-	$(COMPOSE) exec backend bash
-
 # --- Dependency Management (Logic fixed for Folder Isolation) ---
 sync: ## Auto-detect missing imports, update pyproject.toml and lockfile
 	@echo "🔍 Scanning code for missing packages..."
@@ -98,9 +124,12 @@ sync: ## Auto-detect missing imports, update pyproject.toml and lockfile
 		TMP_JSON=$$(mktemp) && \
 		(uv run deptry backend --json-output $$TMP_JSON 2>&1 | grep -v "^\[" || true) && \
 		if [ -s $$TMP_JSON ]; then \
-			jq -r '.[].module' $$TMP_JSON | sort -u | xargs -r uv add --package speeddemon-backend || true; \
+			jq -r '.[].module' $$TMP_JSON | sort -u | grep -vE '^(notebooks)$$' | \
+			xargs -r -I {} sh -c 'uv add --package speeddemon-backend {} 2>&1 || echo "⚠️  Skipped invalid package: {}"' || true; \
 		fi && \
 		rm -f $$TMP_JSON
+	@echo "📦 Installing all workspace dependencies..."
+	@cd $(ROOT_DIR) && uv sync --all-packages
 	@echo "✅ Dependencies synced to backend package."
 
 add: ## Add a package manually: make add PKG=pandas

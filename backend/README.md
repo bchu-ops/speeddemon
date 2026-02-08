@@ -40,9 +40,11 @@ make backend-up     # Start the backend service
    cd /path/to/SpeedDemon
    ```
 
-2. Sync dependencies using uv:
+2. Sync dependencies using uv (must use --all-packages to install workspace member dependencies):
    ```bash
-   uv sync
+   uv sync --all-packages
+   # Or use the Makefile command
+   make sync
    ```
 
 3. Run the backend:
@@ -67,6 +69,11 @@ backend/
 │   │   ├── schema.sql      # Database schema definitions
 │   │   └── models.sql      # SQL business logic and queries
 │   └── main.py             # Backend entry point
+├── data/                    # Data storage (medallion architecture)
+│   ├── .cache/              # Cached intermediate data files
+│   ├── bronze/              # Raw, unprocessed data (as-is from extract)
+│   ├── silver/              # Cleaned and validated data (after transform)
+│   └── gold/                # Business-ready, feature-engineered data (for ML)
 ├── notebooks/               # Jupyter notebooks for research
 │   └── eda/                # Exploratory data analysis
 ├── tests/                   # Unit tests
@@ -113,8 +120,10 @@ make dev
 ### Local Development
 
 ```bash
-# Activate the uv environment
-uv sync
+# Sync workspace dependencies (must use --all-packages)
+uv sync --all-packages
+# Or use the Makefile command
+make sync
 
 # Run the main application
 uv run python backend/src/main.py
@@ -209,6 +218,15 @@ The ETL pipeline consists of three stages:
 2. **Transform**: Clean, validate, and prepare data for analysis
 3. **Load**: Store processed data in the data warehouse (Bronze/Silver/Gold layers)
 
+### Data Storage Architecture (Medallion Pattern)
+
+The `backend/data/` directory follows a medallion architecture pattern:
+
+- **bronze/**: Raw, unprocessed data files exactly as received from sources. Files are stored with timestamps and source identifiers (e.g., `20240315_fastf1_laps.parquet`).
+- **silver/**: Cleaned and validated data after transformation operations. Data is deduplicated, type-corrected, and ready for analysis.
+- **gold/**: Business-ready, aggregated data with feature engineering applied. This layer contains ML-ready features and business metrics.
+- **.cache/**: Temporary storage for intermediate processing results and cached computations.
+
 ## Machine Learning
 
 The ML module provides:
@@ -232,10 +250,10 @@ When adding new features:
 ### Dependencies Not Found
 
 ```bash
-# Re-sync dependencies
-uv sync
+# Re-sync dependencies (must use --all-packages for workspace members)
+uv sync --all-packages
 
-# Check for missing packages
+# Or use the Makefile command (recommended)
 make sync
 ```
 

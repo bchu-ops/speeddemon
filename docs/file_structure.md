@@ -5,6 +5,13 @@ SpeedDemon/
 │	├── ci.yml					# Continuous Integration pipeline (linting, testing, Docker builds)
 │	└── deploy.yml				# Deployment pipeline (builds images, pushes to Docker Hub, deploys to Kubernetes)
 ├── backend/					# Backend Python Service
+│	├── notebooks/				# Research & EDA
+│	│	└── eda/				# Exploratory data analysis notebooks
+│	├── data/					# Data storage directory (medallion architecture)
+│	│	├── .cache/				# Cached data files (temporary storage for intermediate processing)
+│	│	├── bronze/				# Raw, unprocessed data from sources (as-is from extract)
+│	│	├──	silver/				# Cleaned and validated data (after transform operations)
+│	│	└── gold/				# Business-ready, aggregated data (feature-engineered for ML) 
 │	├── src/					# Source code
 │	│	├── data_pipeline/		# E-L-T Engine
 │	│	│	├── extract.py		# Pulls from Kafka/APIs/DBs/Caches/LocalData
@@ -18,8 +25,7 @@ SpeedDemon/
 │	│	│	├── schema.sql		# DuckDB table definitions
 │	│	│	└── models.sql		# SQL-based business logic/joins
 │	│	└── main.py			# Backend entry point
-│	├── notebooks/				# Research & EDA
-│	│	└── eda/				# Exploratory data analysis notebooks
+
 │	├── tests/					# Unit Testing
 │	│	├── data_pipeline/		# ETL tests
 │	│	└── cloud_services/		# Cloud integration tests
