@@ -1,15 +1,17 @@
-# Stage 1: Build Node apps
-FROM node:20-slim AS builder
-WORKDIR /app
-COPY frontend/package*.json ./
-RUN npm install
-COPY frontend/ .
-# In production, we build static files
-RUN npm run build
-
-# Stage 2: Serve with Nginx (or keep Node for Dev)
+# Development: Simple single-stage for dev with hot reload
 FROM node:20-slim
 WORKDIR /app
-COPY --from=builder /app .
+
+# Copy package files first for better caching
+COPY frontend/package*.json ./
+
+# Install dependencies (will be Linux-compatible)
+RUN npm install
+
+# Copy source code
+COPY frontend/ .
+
 EXPOSE 3000
+
+# Default command (can be overridden in docker-compose.yml)
 CMD ["npm", "run", "dev"]

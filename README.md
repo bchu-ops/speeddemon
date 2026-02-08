@@ -109,9 +109,9 @@ The project includes a comprehensive **Master Makefile** at the root for easy ma
 - `make backend-build`  # Build only the Backend/ML image
 - `make backend-up`      # Start only the Backend service
 - `make backend-down`    # Stop only the Backend service
-- `make shell`           # Open a terminal inside the running Backend container
 - `make notebook-url`    # Get the Jupyter login URL for ML research
 - `make frontend-shell`  # Open a terminal inside the running Frontend container
+# - `make shell`           # Open a terminal inside the running Backend container
 ```
 
 ### Utility & Dependency Commands
@@ -158,13 +158,13 @@ If you only want to work on a specific part of the **SpeedDemon** platform while
 
 ```bash
 # Run ONLY the ML Research environment (Jupyter)
-make dev notebook
+make dev-notebook
 
 # Run ONLY the Backend API and ELT logic (FastAPI)
-make dev backend
+make dev-backend
 
 # Run Frontend and Backend together (No Notebook to save RAM)
-make dev frontend backend
+make dev-frontend-backend
 ```
 
 ### Option 4: Local Development

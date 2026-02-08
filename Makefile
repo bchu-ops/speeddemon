@@ -36,8 +36,8 @@ clean: ## Deep clean: remove containers, images, volumes, and orphans
 	$(COMPOSE) down --rmi all --volumes --remove-orphans
 
 # --- Development Commands ---
-dev: ## Start in development mode (Hot-reload via bind mounts)
-	$(COMPOSE) up
+dev: ## Start in development mode (Hot-reload via bind mounts). Usage: make dev [service1] [service2] (e.g., make dev backend frontend)
+	$(COMPOSE) up $(filter-out $@,$(MAKECMDGOALS))
 
 dev-up: ## Start development services (detached)
 	$(COMPOSE) up -d
@@ -156,3 +156,7 @@ k8s-deploy: k8s-sync-secrets ## Deploy everything to Kubernetes (Secrets + App +
 
 # migration-new: ## Create a new migration file: make migration-new MSG="add_user_table"
 # 	$(COMPOSE) run --rm backend alembic revision --autogenerate -m "$(MSG)"
+
+# Catch-all target to prevent Make from complaining about service names passed as arguments to dev
+%:
+	@:
