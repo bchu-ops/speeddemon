@@ -1,0 +1,18 @@
+[project]
+name = "speeddemon-workspace"
+version = "0.1.0"
+description = "AI-Powered ELT and ML Platform"
+readme = "README.md"
+requires-python = ">=3.12"
+
+# This defines the sub-folders uv should manage
+[tool.uv]
+workspace = { members = ["backend"] }
+
+[tool.uv.workspace]
+# This allows shared dev tools across the whole project
+dev-dependencies = [
+    "ruff",    # Linting
+    "pytest",  # Testing
+    "deptry",  # Dependency Audit
+]

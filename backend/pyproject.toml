@@ -1,0 +1,21 @@
+[project]
+name = "speeddemon-backend"
+version = "0.1.0"
+dependencies = [
+    "fastapi",
+    "uvicorn",
+    "pdfjs-dist",
+    "pdf-decomposer",
+    "boto3",           # For AWS S3 ELT
+    "pandas",          # For Data Transformation
+    "scikit-learn",    # For ML
+    "mlflow",          # For MLOps (Model Tracking)
+    "jupyter",         # For Notebook research
+]
+
+[tool.uv]
+dev-dependencies = [
+    "pytest",
+    "ruff",
+    "deptry",
+]

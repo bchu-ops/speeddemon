@@ -20,25 +20,36 @@ jobs:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
-      # 1. Build and Push the SpeedDemon Image
-      - name: Build and Push
+      # 1. Build and Push the Backend Image
+      - name: Build and Push Backend
         uses: docker/build-push-action@v5
         with:
           context: .
-          file: deploy/Dockerfile
+          file: deploy/Dockerfile.backend
           push: true
           tags: |
-            ${{ secrets.DOCKERHUB_USERNAME }}/speeddemon:latest
-            ${{ secrets.DOCKERHUB_USERNAME }}/speeddemon:${{ github.sha }}
+            ${{ secrets.DOCKERHUB_USERNAME }}/speeddemon-backend:latest
+            ${{ secrets.DOCKERHUB_USERNAME }}/speeddemon-backend:${{ github.sha }}
 
-      # 2. Set Kubernetes Context (The "Passport")
+      # 2. Build and Push the Frontend Image
+      - name: Build and Push Frontend
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: deploy/Dockerfile.frontend
+          push: true
+          tags: |
+            ${{ secrets.DOCKERHUB_USERNAME }}/speeddemon-frontend:latest
+            ${{ secrets.DOCKERHUB_USERNAME }}/speeddemon-frontend:${{ github.sha }}
+
+      # 3. Set Kubernetes Context (The "Passport")
       - name: Set Kubernetes Context
         uses: azure/k8s-set-context@v3
         with:
           method: kubeconfig
           kubeconfig: ${{ secrets.KUBE_CONFIG }} 
 
-      # 3. Deploy to Cluster & Inject 'app-secrets'
+      # 4. Deploy to Cluster & Inject 'app-secrets'
       - name: Deploy to Kubernetes
         run: |
           # Apply the networking and deployment manifests from the deploy/ folder
@@ -47,7 +58,7 @@ jobs:
           
           # Force a Rolling Update using the new SHA tag
           kubectl set image deployment/speeddemon-deployment \
-            backend=${{ secrets.DOCKERHUB_USERNAME }}/speeddemon:${{ github.sha }}
+            backend=${{ secrets.DOCKERHUB_USERNAME }}/speeddemon-backend:${{ github.sha }}
           
           # Check if the pods successfully pick up the 'app-secrets' and start
           kubectl rollout status deployment/speeddemon-deployment

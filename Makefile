@@ -1,18 +1,20 @@
 # --- Path Logic (Industry Standard for Folder Isolation) ---
-# MKFILE_PATH: Absolute path to this Makefile (e.g., /user/project/deploy/Makefile)
-# MKFILE_DIR:  The directory of this Makefile (/user/project/deploy/)
-# ROOT_DIR:    The project root (/user/project/)
-# K8S_NAME:  The name of the Kubernetes Secret to sync with .env keys
-MKFILE_PATH := $(abspath $(lastword $(MAKEFILE_LIST)))
-MKFILE_DIR  := $(dir $(MKFILE_PATH))
-ROOT_DIR    := $(abspath $(MKFILE_DIR)..)
-K8S_NAME = app-secrets
+# ROOT_DIR:    The project root (where Makefile is located)
+# DEPLOY_DIR:  The deploy directory containing docker-compose.yml and k8s files
+# K8S_NAME:    The name of the Kubernetes Secret to sync with .env keys
+ROOT_DIR    := $(abspath $(dir $(lastword $(MAKEFILE_LIST))))
+DEPLOY_DIR  := $(ROOT_DIR)/deploy
+K8S_NAME    := app-secrets
+
+# --- Service Names (Matches docker-compose) ---
+BACKEND_NAME  := speeddemon_backend
+FRONTEND_NAME := speeddemon_frontend
+NOTEBOOK_NAME := speeddemon_notebook
 
 # --- Docker Variable ---
-COMPOSE = docker compose -f $(MKFILE_DIR)docker-compose.yml
+COMPOSE = docker compose -f $(DEPLOY_DIR)/docker-compose.yml
 
-.PHONY: help build up down restart logs clean dev dev-up dev-down dev-logs backend-build backend-up backend-down status health sync add test lint shell
-
+.PHONY: help build up down restart logs clean dev dev-up dev-down dev-logs backend-build backend-up backend-down status health sync add test lint shell notebook-url frontend-shell
 # --- Help ---
 help: ## Show all available commands
 	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | sort | awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-20s\033[0m %s\n", $$1, $$2}'
@@ -30,9 +32,6 @@ down: ## Stop all services
 restart: ## Restart all services
 	$(COMPOSE) restart
 
-logs: ## View logs from all services
-	$(COMPOSE) logs -f
-
 clean: ## Deep clean: remove containers, images, volumes, and orphans
 	$(COMPOSE) down --rmi all --volumes --remove-orphans
 
@@ -46,8 +45,15 @@ dev-up: ## Start development services (detached)
 dev-down: ## Stop development services
 	$(COMPOSE) down
 
-dev-logs: ## View development logs
-	$(COMPOSE) logs -f backend
+# --- ML & Research Commands (New!) ---
+notebook-url: ## Get the login URL for the Jupyter Notebook container
+	@docker logs $(NOTEBOOK_NAME) 2>&1 | grep -m 1 "token=" | sed 's/.*or http/http/' | sed 's/0.0.0.0/localhost/'
+
+shell: ## Open a shell in the Backend (ELT/API) container
+	docker exec -it $(BACKEND_NAME) bash
+
+frontend-shell: ## Open a shell in the Frontend (React) container
+	docker exec -it $(FRONTEND_NAME) bash
 
 # --- Backend Specific Commands ---
 backend-build: ## Build only backend services
@@ -66,12 +72,18 @@ status: ## Show status of all services
 health: ## Check health of all services
 	$(COMPOSE) ps --filter "status=running"
 
-# --- Quality & Debugging ---
+# --- Quality & Logs ---
+logs: ## View logs from all services
+	$(COMPOSE) logs -f
+
+dev-logs: ## View development logs (Backend specifically)
+	$(COMPOSE) logs -f $(BACKEND_NAME)
+
 test: ## Run tests inside the backend container
 	$(COMPOSE) run --rm backend pytest
 
 test-cov: ## Run tests and generate a coverage report (HTML)
-	$(COMPOSE) run --rm backend pytest --cov=src --cov-report=html
+	$(COMPOSE) run --rm backend pytest --cov=backend/src --cov-report=html
 
 lint: ## Check for code style issues locally
 	@cd $(ROOT_DIR) && uv run ruff check .
@@ -82,12 +94,18 @@ shell: ## Open a shell in the running backend container
 # --- Dependency Management (Logic fixed for Folder Isolation) ---
 sync: ## Auto-detect missing imports, update pyproject.toml and lockfile
 	@echo "🔍 Scanning code for missing packages..."
-	@cd $(ROOT_DIR) && uv run deptry . --json | jq -r '.issues.missing | .[]' | xargs -r uv add
-	@echo "✅ Dependencies synced locally."
+	@cd $(ROOT_DIR) && \
+		TMP_JSON=$$(mktemp) && \
+		(uv run deptry backend --json-output $$TMP_JSON 2>&1 | grep -v "^\[" || true) && \
+		if [ -s $$TMP_JSON ]; then \
+			jq -r '.[].module' $$TMP_JSON | sort -u | xargs -r uv add --package speeddemon-backend || true; \
+		fi && \
+		rm -f $$TMP_JSON
+	@echo "✅ Dependencies synced to backend package."
 
 add: ## Add a package manually: make add PKG=pandas
 	@if [ -z "$(PKG)" ]; then echo "Usage: make add PKG=package-name"; exit 1; fi
-	@cd $(ROOT_DIR) && uv add $(PKG)
+	@cd $(ROOT_DIR) && uv add $(PKG) --package speeddemon-backend
 
 # --- Kubernetes Commands ---
 k8s-sync-secrets: ## Sync local .env keys to Kubernetes
@@ -97,8 +115,8 @@ k8s-sync-secrets: ## Sync local .env keys to Kubernetes
 		--dry-run=client -o yaml | kubectl apply -f -
 
 k8s-deploy: k8s-sync-secrets ## Deploy everything to Kubernetes (Secrets + App + Service)
-	@kubectl apply -f $(MKFILE_DIR)k8s-deployment.yml
-	@kubectl apply -f $(MKFILE_DIR)k8s-service.yml
+	@kubectl apply -f $(DEPLOY_DIR)/k8s-deployment.yml
+	@kubectl apply -f $(DEPLOY_DIR)/k8s-service.yml
 	@echo "🚀 Successfully deployed to Kubernetes!"
 
 # #########		FUTURE?		###########		--- Database Migrations ---

@@ -1,15 +1,16 @@
 services:
+  # Python Backend: API, ELT, and ML Inference
   backend:
     build:
       # Context '..' is vital because this file is inside /deploy
       context: .. 
-      dockerfile: deploy/Dockerfile
-    container_name: speeddemon_dev
+      dockerfile: deploy/Dockerfile.backend
+    container_name: speeddemon_backend
     ports:
       - "8000:8000"
     # Mount local source code for instant updates without rebuilding
     volumes:
-      - ../src:/app/src
+      - ../backend:/app/backend
     # Pulls your local secrets (OPENAI_API_KEY, etc.) into the container
     env_file:
       - ../.env
@@ -27,6 +28,38 @@ services:
         - path: ../uv.lock
           action: rebuild
         # If you just edit Python files, sync them without restarting
-        - path: ../src
+        - path: ../backend/src
+          action: sync
+          target: /app/backend/src
+  
+  # React UI: Vite-based Hot Reload
+  frontend:
+    build:
+      context: ..
+      dockerfile: deploy/Dockerfile.frontend
+    container_name: speeddemon_frontend
+    ports:
+      - "3000:3000"
+    volumes:
+      - ../frontend:/app
+    depends_on:
+      - backend
+    develop:
+      watch:
+        - path: ../frontend/src
           action: sync
           target: /app/src
+
+  # ML Notebook: Research lab using the backend environment
+  notebook:
+    build:
+      context: ..
+      dockerfile: deploy/Dockerfile.backend
+    container_name: speeddemon_notebook
+    ports:
+      - "8888:8888"
+    volumes:
+      - ../backend:/app/backend
+    env_file:
+      - ../.env
+    command: uv run jupyter notebook --ip=0.0.0.0 --port=8888 --no-browser --allow-root
